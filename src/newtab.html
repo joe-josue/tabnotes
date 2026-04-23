@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New Tab</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <aside id="sidebar" class="sidebar">
+        <div class="sidebar-head">
+          <button id="new-note" class="btn-new" title="New note">＋ New</button>
+        </div>
+        <ul id="note-list" class="note-list"></ul>
+      </aside>
+      <button id="sidebar-toggle" class="sidebar-toggle" title="Collapse sidebar (Cmd/Ctrl+\)" aria-label="Toggle sidebar">
+        <svg class="chev-open" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        <svg class="chev-closed" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <main id="editor-wrap" class="editor-wrap">
+        <div class="editor-toolbar">
+          <button id="mode-toggle" class="tool-btn" title="Toggle markdown / plain text" aria-label="Toggle markdown mode">Aa</button>
+          <button id="save-btn" class="tool-btn" title="Download note (Cmd/Ctrl+S)" aria-label="Download note">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </button>
+        </div>
+        <div id="editor" class="editor"></div>
+      </main>
+    </div>
+    <!-- Save toast — bottom-right, outside the grid so fixed positioning is clean -->
+    <div id="save-toast" class="save-toast" role="status" aria-live="polite">
+      <span class="save-toast-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </span>
+      <div>
+        <div class="save-toast-name" id="save-toast-name"></div>
+        <div class="save-toast-sub">Saved to Downloads</div>
+      </div>
+    </div>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
