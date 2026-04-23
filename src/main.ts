@@ -13,6 +13,7 @@ import {
   removeNote,
   seedWelcomeIfNeeded,
   setActiveId,
+  setFontSize,
   setRenderMode,
   setSidebarCollapsed,
   upsertNote,
@@ -25,8 +26,13 @@ initTheme();
 let current: Note;
 let editor: EditorHandle;
 let mode: RenderMode = 'markdown';
+let fontSize = 16;
+let settingsOpen = false;
 let saveTimer: number | undefined;
 let toastTimer: number | undefined;
+
+const FONT_MIN = 12;
+const FONT_MAX = 24;
 
 function showToast(filename: string) {
   const toast = document.getElementById('save-toast')!;
@@ -125,6 +131,37 @@ function refreshModeButton() {
   }
 }
 
+function applyFontSize(size: number) {
+  fontSize = size;
+  document.documentElement.style.setProperty('--editor-font-size', `${size}px`);
+  const valEl = document.getElementById('font-size-val');
+  if (valEl) valEl.textContent = String(size);
+  const decBtn = document.getElementById('font-dec') as HTMLButtonElement | null;
+  const incBtn = document.getElementById('font-inc') as HTMLButtonElement | null;
+  if (decBtn) decBtn.disabled = size <= FONT_MIN;
+  if (incBtn) incBtn.disabled = size >= FONT_MAX;
+}
+
+function openSettingsPanel() {
+  const panel = document.getElementById('settings-panel')!;
+  const btn = document.getElementById('settings-btn')!;
+  panel.classList.add('open');
+  panel.setAttribute('aria-hidden', 'false');
+  btn.classList.add('is-active');
+  btn.setAttribute('aria-expanded', 'true');
+  settingsOpen = true;
+}
+
+function closeSettingsPanel() {
+  const panel = document.getElementById('settings-panel')!;
+  const btn = document.getElementById('settings-btn')!;
+  panel.classList.remove('open');
+  panel.setAttribute('aria-hidden', 'true');
+  btn.classList.remove('is-active');
+  btn.setAttribute('aria-expanded', 'false');
+  settingsOpen = false;
+}
+
 function wireToolbar() {
   document.getElementById('save-btn')!.addEventListener('click', () => {
     downloadNote(current, mode, showToast);
@@ -139,10 +176,44 @@ function wireToolbar() {
     editor.focus();
   });
   refreshModeButton();
+
+  // Settings panel
+  document.getElementById('settings-btn')!.addEventListener('click', (e) => {
+    e.stopPropagation();
+    settingsOpen ? closeSettingsPanel() : openSettingsPanel();
+  });
+
+  document.getElementById('font-dec')!.addEventListener('click', async () => {
+    const next = Math.max(FONT_MIN, fontSize - 1);
+    applyFontSize(next);
+    await setFontSize(next);
+  });
+
+  document.getElementById('font-inc')!.addEventListener('click', async () => {
+    const next = Math.min(FONT_MAX, fontSize + 1);
+    applyFontSize(next);
+    await setFontSize(next);
+  });
+
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!settingsOpen) return;
+    const panel = document.getElementById('settings-panel')!;
+    const btn = document.getElementById('settings-btn')!;
+    if (!panel.contains(e.target as Node) && !btn.contains(e.target as Node)) {
+      closeSettingsPanel();
+    }
+  });
 }
 
 function wireGlobalKeys(sidebar: { render: (id: string | null) => Promise<void> }) {
   window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && settingsOpen) {
+      e.preventDefault();
+      closeSettingsPanel();
+      editor.focus();
+      return;
+    }
     const meta = e.metaKey || e.ctrlKey;
     if (meta && e.key === '\\') {
       e.preventDefault();
@@ -160,6 +231,7 @@ async function boot() {
   const justSeeded = await seedWelcomeIfNeeded();
   const state = await getState();
   mode = state.renderMode;
+  applyFontSize(state.fontSize ?? 16);
 
   let note: Note;
   if (justSeeded && state.activeId) {

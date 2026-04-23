@@ -213,7 +213,7 @@ const markHidePlugin = ViewPlugin.fromClass(
 const editorTheme = EditorView.theme({
   '&': {
     height: '100%',
-    fontSize: '16px',
+    fontSize: 'var(--editor-font-size, 16px)',
     backgroundColor: 'transparent',
     color: 'var(--fg)'
   },

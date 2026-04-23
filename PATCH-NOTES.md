@@ -4,6 +4,15 @@ Plain-English release log. Written for humans — users, visitors, you at 2am. U
 
 ---
 
+## v1.2.0 — "Make It Yours" *(shipped)*
+
+The first step toward a personalised writing environment.
+
+- **Font size — your call** — a new settings panel (the sliders icon, top-right) lets you dial the editor text up or down between 12 and 24px. One click to open, one tap on `−` or `+` to adjust, your choice remembered the next time you open a tab.
+- **Inline settings panel** — opens and closes in place, right below the toolbar. No new pages, no modals, no context switches. Press `Escape` or click anywhere outside to dismiss it. Room inside for whatever comes next.
+
+---
+
 ## v1.1.2 — "No More Ghosts" *(shipped)*
 
 Two bugs that broke the illusion of a clean editor.

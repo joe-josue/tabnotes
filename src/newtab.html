@@ -24,6 +24,22 @@
           <button id="save-btn" class="tool-btn" title="Download note (Cmd/Ctrl+S)" aria-label="Download note">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           </button>
+          <button id="settings-btn" class="tool-btn" title="Settings" aria-label="Open settings" aria-expanded="false">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="7" r="2"/><line x1="3" y1="7" x2="7" y2="7"/><line x1="11" y1="7" x2="21" y2="7"/>
+              <circle cx="15" cy="17" r="2"/><line x1="3" y1="17" x2="13" y2="17"/><line x1="17" y1="17" x2="21" y2="17"/>
+            </svg>
+          </button>
+        </div>
+        <div id="settings-panel" class="settings-panel" aria-hidden="true">
+          <div class="settings-row">
+            <span class="settings-label">Font size</span>
+            <div class="font-size-stepper">
+              <button id="font-dec" class="stepper-btn" aria-label="Decrease font size">−</button>
+              <span id="font-size-val" class="stepper-val">16</span>
+              <button id="font-inc" class="stepper-btn" aria-label="Increase font size">+</button>
+            </div>
+          </div>
         </div>
         <div id="editor" class="editor"></div>
       </main>

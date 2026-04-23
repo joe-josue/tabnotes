@@ -13,6 +13,7 @@ type State = {
   sidebarCollapsed: boolean;
   renderMode: RenderMode;
   welcomeSeeded: boolean;
+  fontSize: number;
 };
 
 const DEFAULT_STATE: State = {
@@ -20,7 +21,8 @@ const DEFAULT_STATE: State = {
   activeId: null,
   sidebarCollapsed: false,
   renderMode: 'markdown',
-  welcomeSeeded: false
+  welcomeSeeded: false,
+  fontSize: 16
 };
 
 const hasChromeStorage =
@@ -36,14 +38,16 @@ async function readAll(): Promise<State> {
     'activeId',
     'sidebarCollapsed',
     'renderMode',
-    'welcomeSeeded'
+    'welcomeSeeded',
+    'fontSize'
   ]);
   return {
     notes: got.notes ?? {},
     activeId: got.activeId ?? null,
     sidebarCollapsed: got.sidebarCollapsed ?? false,
     renderMode: (got.renderMode as RenderMode) ?? 'markdown',
-    welcomeSeeded: got.welcomeSeeded ?? false
+    welcomeSeeded: got.welcomeSeeded ?? false,
+    fontSize: (got.fontSize as number) ?? 16
   };
 }
 
@@ -106,6 +110,10 @@ export async function setSidebarCollapsed(collapsed: boolean): Promise<void> {
 
 export async function setRenderMode(mode: RenderMode): Promise<void> {
   await writePartial({ renderMode: mode });
+}
+
+export async function setFontSize(size: number): Promise<void> {
+  await writePartial({ fontSize: size });
 }
 
 const WELCOME_BODY = `# Welcome to tab-notes
