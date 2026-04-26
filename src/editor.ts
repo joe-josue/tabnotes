@@ -10,6 +10,7 @@ import {
 import { defaultKeymap, history, historyKeymap, indentLess, indentMore } from '@codemirror/commands';
 import { markdown } from '@codemirror/lang-markdown';
 import { syntaxHighlighting, HighlightStyle, syntaxTree } from '@codemirror/language';
+import { languages } from '@codemirror/language-data';
 import { tags as t } from '@lezer/highlight';
 import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
 import type { RenderMode } from './storage';
@@ -130,6 +131,7 @@ function buildMarkHideDecorations(view: EditorView): DecorationSet {
 }
 
 const markdownHighlight = HighlightStyle.define([
+  // ── Markdown ────────────────────────────────────────────────────────────────
   { tag: t.strong, fontWeight: '700' },
   { tag: t.emphasis, fontStyle: 'italic' },
   { tag: t.strikethrough, textDecoration: 'line-through' },
@@ -138,7 +140,20 @@ const markdownHighlight = HighlightStyle.define([
   { tag: t.url, color: 'var(--muted)' },
   { tag: t.meta, color: 'var(--muted)' },
   { tag: t.processingInstruction, color: 'var(--muted)' },
-  { tag: t.quote, color: 'var(--muted)', fontStyle: 'italic' }
+  { tag: t.quote, color: 'var(--muted)', fontStyle: 'italic' },
+  // ── Code block tokens ───────────────────────────────────────────────────────
+  { tag: [t.keyword, t.bool, t.null], color: 'var(--hl-kw)' },
+  { tag: [t.string, t.special(t.string), t.regexp], color: 'var(--hl-str)' },
+  { tag: t.comment, color: 'var(--hl-comment)', fontStyle: 'italic' },
+  { tag: [t.number, t.integer, t.float], color: 'var(--hl-num)' },
+  { tag: [t.typeName, t.className, t.namespace], color: 'var(--hl-type)' },
+  { tag: [t.function(t.variableName), t.function(t.propertyName)], color: 'var(--hl-fn)' },
+  { tag: [t.definition(t.variableName), t.variableName], color: 'var(--hl-var)' },
+  { tag: t.propertyName, color: 'var(--hl-prop)' },
+  { tag: [t.tagName, t.angleBracket], color: 'var(--hl-tag)' },
+  { tag: t.attributeName, color: 'var(--hl-attr)' },
+  { tag: t.operator, color: 'var(--hl-op)' },
+  { tag: t.punctuation, color: 'var(--muted)' },
 ]);
 
 // ── Hanging-indent for list lines ────────────────────────────────────────────
@@ -261,7 +276,7 @@ const mode = new Compartment();
 
 function modeExtension(m: RenderMode) {
   return m === 'markdown'
-    ? [markdown(), syntaxHighlighting(markdownHighlight, { fallback: true }), headingPlugin, markHidePlugin, closeBrackets()]
+    ? [markdown({ codeLanguages: languages }), syntaxHighlighting(markdownHighlight, { fallback: true }), headingPlugin, markHidePlugin, closeBrackets()]
     : [];
 }
 

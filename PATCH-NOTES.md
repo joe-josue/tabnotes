@@ -4,6 +4,15 @@ Plain-English release log. Written for humans — users, visitors, you at 2am. U
 
 ---
 
+## v1.3.0 — "Color Your Work" *(shipped)*
+
+Code blocks now look the way developers expect them to.
+
+- **Syntax highlighting in fenced code blocks** — open a code fence with a language tag (`` ```js ``, `` ```python ``, `` ```bash ``, and many more) and the code inside gets full token colouring: keywords, strings, comments, numbers, types, functions, and operators each in a distinct colour. No config, no toggle — it just works.
+- **Theme-aware colours** — the highlight palette is tuned for both light and dark mode. Purple for keywords, green for strings, amber for numbers, cyan for types. Quiet enough not to distract, distinct enough to actually help.
+
+---
+
 ## v1.2.0 — "Make It Yours" *(shipped)*
 
 The first step toward a personalised writing environment.
