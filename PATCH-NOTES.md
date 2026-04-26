@@ -4,6 +4,15 @@ Plain-English release log. Written for humans — users, visitors, you at 2am. U
 
 ---
 
+## v1.3.1 — "Hierarchy at a Glance" *(shipped)*
+
+Headings now carry their own colour, so document structure is readable without counting hash marks.
+
+- **Coloured headings** — each heading level has a distinct, consistent colour: H1 in accent orange, H2 purple, H3 blue, H4 teal, H5 amber, H6 muted. The same heading level always looks the same, wherever it appears in the document.
+- **Theme-aware** — the palette adjusts for both light and dark mode, the same way code highlighting does.
+
+---
+
 ## v1.3.0 — "Color Your Work" *(shipped)*
 
 Code blocks now look the way developers expect them to.

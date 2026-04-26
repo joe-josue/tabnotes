@@ -253,23 +253,26 @@ const editorTheme = EditorView.theme({
     fontSize: '1.9em',
     fontWeight: '700',
     lineHeight: '1.25',
-    padding: '0.6em 0 0.1em'
+    padding: '0.6em 0 0.1em',
+    color: 'var(--hl-h1)'
   },
   '.cm-line.tn-h2': {
     fontSize: '1.5em',
     fontWeight: '700',
     lineHeight: '1.3',
-    padding: '0.5em 0 0.1em'
+    padding: '0.5em 0 0.1em',
+    color: 'var(--hl-h2)'
   },
   '.cm-line.tn-h3': {
     fontSize: '1.25em',
     fontWeight: '600',
     lineHeight: '1.35',
-    padding: '0.4em 0 0.1em'
+    padding: '0.4em 0 0.1em',
+    color: 'var(--hl-h3)'
   },
-  '.cm-line.tn-h4': { fontSize: '1.1em', fontWeight: '600' },
-  '.cm-line.tn-h5': { fontSize: '1.05em', fontWeight: '600' },
-  '.cm-line.tn-h6': { fontSize: '1em', fontWeight: '600', color: 'var(--muted)' }
+  '.cm-line.tn-h4': { fontSize: '1.1em', fontWeight: '600', color: 'var(--hl-h4)' },
+  '.cm-line.tn-h5': { fontSize: '1.05em', fontWeight: '600', color: 'var(--hl-h5)' },
+  '.cm-line.tn-h6': { fontSize: '1em', fontWeight: '600', color: 'var(--hl-h6)' }
 });
 
 const mode = new Compartment();
