@@ -40,6 +40,14 @@
               <button id="font-inc" class="stepper-btn" aria-label="Increase font size">+</button>
             </div>
           </div>
+          <div class="settings-row">
+            <span class="settings-label">Save to</span>
+            <div class="vault-control">
+              <span id="vault-name" class="vault-name">Downloads folder</span>
+              <button id="vault-pick" class="vault-btn" title="Choose a folder">Choose…</button>
+              <button id="vault-clear" class="vault-btn vault-btn-clear" title="Reset to Downloads" aria-label="Clear vault" style="display:none">×</button>
+            </div>
+          </div>
         </div>
         <div id="editor" class="editor"></div>
       </main>
@@ -51,7 +59,7 @@
       </span>
       <div>
         <div class="save-toast-name" id="save-toast-name"></div>
-        <div class="save-toast-sub">Saved to Downloads</div>
+        <div class="save-toast-sub" id="save-toast-sub">Saved to Downloads</div>
       </div>
     </div>
     <script type="module" src="./main.ts"></script>

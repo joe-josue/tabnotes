@@ -14,6 +14,8 @@ type State = {
   renderMode: RenderMode;
   welcomeSeeded: boolean;
   fontSize: number;
+  /** Display name of the chosen vault folder. The actual handle lives in IndexedDB. */
+  vaultDisplayName: string | null;
 };
 
 const DEFAULT_STATE: State = {
@@ -22,7 +24,8 @@ const DEFAULT_STATE: State = {
   sidebarCollapsed: false,
   renderMode: 'markdown',
   welcomeSeeded: false,
-  fontSize: 16
+  fontSize: 16,
+  vaultDisplayName: null
 };
 
 const hasChromeStorage =
@@ -39,7 +42,8 @@ async function readAll(): Promise<State> {
     'sidebarCollapsed',
     'renderMode',
     'welcomeSeeded',
-    'fontSize'
+    'fontSize',
+    'vaultDisplayName'
   ]);
   return {
     notes: got.notes ?? {},
@@ -47,7 +51,8 @@ async function readAll(): Promise<State> {
     sidebarCollapsed: got.sidebarCollapsed ?? false,
     renderMode: (got.renderMode as RenderMode) ?? 'markdown',
     welcomeSeeded: got.welcomeSeeded ?? false,
-    fontSize: (got.fontSize as number) ?? 16
+    fontSize: (got.fontSize as number) ?? 16,
+    vaultDisplayName: (got.vaultDisplayName as string | null) ?? null
   };
 }
 
@@ -62,7 +67,16 @@ async function writePartial(patch: Partial<State>): Promise<void> {
 }
 
 export function deriveTitle(body: string): string {
-  const line = body.split('\n').find((l) => l.trim().length > 0) ?? '';
+  // Prefer frontmatter `title` field if present
+  const fmMatch = /^---\r?\n[\s\S]*?\r?\ntitle:\s*(.+)/m.exec(body);
+  if (fmMatch) {
+    const t = fmMatch[1].trim().replace(/^["']|["']$/g, '');
+    if (t) return t.length > 60 ? t.slice(0, 60) + '…' : t;
+  }
+  // Fall back to first non-empty line, stripping heading marks
+  const contentStart = /^---\r?\n[\s\S]*?\r?\n---(?:\r?\n|$)/.exec(body);
+  const searchIn = contentStart ? body.slice(contentStart[0].length) : body;
+  const line = searchIn.split('\n').find((l) => l.trim().length > 0) ?? '';
   const cleaned = line.replace(/^#+\s*/, '').trim();
   if (!cleaned) return 'Untitled';
   return cleaned.length > 60 ? cleaned.slice(0, 60) + '…' : cleaned;
@@ -114,6 +128,10 @@ export async function setRenderMode(mode: RenderMode): Promise<void> {
 
 export async function setFontSize(size: number): Promise<void> {
   await writePartial({ fontSize: size });
+}
+
+export async function setVaultDisplayName(name: string | null): Promise<void> {
+  await writePartial({ vaultDisplayName: name });
 }
 
 const WELCOME_BODY = `# Welcome to tab-notes

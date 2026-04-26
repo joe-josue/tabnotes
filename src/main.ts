@@ -3,6 +3,7 @@ import { createEditor, type EditorHandle } from './editor';
 import { mountSidebar } from './sidebar';
 import { downloadNote } from './download';
 import { initTheme } from './theme';
+import { pickVault, clearVault, getVaultName, fsapiSupported } from './vault';
 import {
   deriveTitle,
   ensureActiveNote,
@@ -16,6 +17,7 @@ import {
   setFontSize,
   setRenderMode,
   setSidebarCollapsed,
+  setVaultDisplayName,
   upsertNote,
   type Note,
   type RenderMode
@@ -34,10 +36,10 @@ let toastTimer: number | undefined;
 const FONT_MIN = 12;
 const FONT_MAX = 24;
 
-function showToast(filename: string) {
+function showToast(filename: string, location = 'Downloads') {
   const toast = document.getElementById('save-toast')!;
-  const nameEl = document.getElementById('save-toast-name')!;
-  nameEl.textContent = filename;
+  document.getElementById('save-toast-name')!.textContent = filename;
+  document.getElementById('save-toast-sub')!.textContent = `Saved to ${location}`;
   toast.classList.add('show');
   if (toastTimer) window.clearTimeout(toastTimer);
   toastTimer = window.setTimeout(() => toast.classList.remove('show'), 2500);
@@ -164,7 +166,7 @@ function closeSettingsPanel() {
 
 function wireToolbar() {
   document.getElementById('save-btn')!.addEventListener('click', () => {
-    downloadNote(current, mode, showToast);
+    void downloadNote(current, mode, showToast);
   });
 
   const modeBtn = document.getElementById('mode-toggle') as HTMLButtonElement;
@@ -193,6 +195,44 @@ function wireToolbar() {
     const next = Math.min(FONT_MAX, fontSize + 1);
     applyFontSize(next);
     await setFontSize(next);
+  });
+
+  // Vault selector
+  const vaultPickBtn = document.getElementById('vault-pick')!;
+  const vaultClearBtn = document.getElementById('vault-clear') as HTMLButtonElement;
+  const vaultNameEl = document.getElementById('vault-name')!;
+
+  // Hide vault controls entirely if the browser doesn't support FSAPI
+  if (!fsapiSupported()) {
+    vaultPickBtn.style.display = 'none';
+  }
+
+  function refreshVaultUI(name: string | null) {
+    if (name) {
+      vaultNameEl.textContent = name;
+      vaultNameEl.title = name;
+      vaultClearBtn.style.display = '';
+    } else {
+      vaultNameEl.textContent = 'Downloads folder';
+      vaultNameEl.title = '';
+      vaultClearBtn.style.display = 'none';
+    }
+  }
+
+  // Load current vault name on boot (called after wireToolbar, so the elements exist)
+  getVaultName().then(refreshVaultUI);
+
+  vaultPickBtn.addEventListener('click', async () => {
+    const handle = await pickVault();
+    if (!handle) return; // user cancelled
+    await setVaultDisplayName(handle.name);
+    refreshVaultUI(handle.name);
+  });
+
+  vaultClearBtn.addEventListener('click', async () => {
+    await clearVault();
+    await setVaultDisplayName(null);
+    refreshVaultUI(null);
   });
 
   // Close on outside click
@@ -254,7 +294,7 @@ async function boot() {
     initial: note.body,
     initialMode: mode,
     onChange: (body) => scheduleSave(body, sidebar),
-    onSave: () => downloadNote(current, mode, showToast)
+    onSave: () => void downloadNote(current, mode, showToast)
   });
 
   await sidebar.render(note.id);
@@ -262,6 +302,13 @@ async function boot() {
   wireToolbar();
   wireGlobalKeys(sidebar);
   editor.focus();
+  // Sync vault display name from IndexedDB → chrome.storage on each boot
+  // (handles the case where the user cleared the handle outside the app)
+  getVaultName().then((name) => {
+    if (name !== (state.vaultDisplayName ?? null)) {
+      void setVaultDisplayName(name);
+    }
+  });
 }
 
 boot();

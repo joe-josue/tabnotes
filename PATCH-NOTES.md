@@ -4,6 +4,16 @@ Plain-English release log. Written for humans — users, visitors, you at 2am. U
 
 ---
 
+## v1.4.0 — "Write, Then File" *(shipped)*
+
+Two features that make notes feel more like real documents.
+
+- **YAML frontmatter support** — drop a `---` block at the top of any note and tab-notes reads it properly. The frontmatter title becomes the note's name in the sidebar. Tags, dates, and any custom fields you add are preserved exactly as written — through edits, saves, and exports. Fully compatible with Obsidian and any other tool that reads standard YAML frontmatter.
+- **Export timestamps** — when you save a note to disk, the exported file automatically gets `created` and `updated` dates in its frontmatter (if frontmatter is present). The copy open in your editor is never touched — only the file you download gets the timestamp.
+- **Save to a folder of your choice** — a new "Save to" row in the settings panel lets you pick any folder on your computer as your personal note vault. After that, every `Cmd/Ctrl+S` writes the file directly there — no Downloads folder, no duplicate files piling up. One click on × resets back to Downloads whenever you want.
+
+---
+
 ## v1.3.1 — "Hierarchy at a Glance" *(shipped)*
 
 Headings now carry their own colour, so document structure is readable without counting hash marks.
