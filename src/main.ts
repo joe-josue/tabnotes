@@ -202,9 +202,18 @@ function wireToolbar() {
   const vaultClearBtn = document.getElementById('vault-clear') as HTMLButtonElement;
   const vaultNameEl = document.getElementById('vault-name')!;
 
+  function markVaultUnavailable() {
+    vaultPickBtn.disabled = true;
+    vaultPickBtn.textContent = 'Not available';
+    vaultPickBtn.title = 'Your browser has blocked folder access for extension pages';
+    vaultNameEl.textContent = 'Downloads folder';
+    vaultNameEl.title = '';
+    vaultClearBtn.style.display = 'none';
+  }
+
   // Hide vault controls entirely if the browser doesn't support FSAPI
   if (!fsapiSupported()) {
-    vaultPickBtn.style.display = 'none';
+    markVaultUnavailable();
   }
 
   function refreshVaultUI(name: string | null) {
@@ -223,10 +232,16 @@ function wireToolbar() {
   getVaultName().then(refreshVaultUI);
 
   vaultPickBtn.addEventListener('click', async () => {
-    const handle = await pickVault();
-    if (!handle) return; // user cancelled
-    await setVaultDisplayName(handle.name);
-    refreshVaultUI(handle.name);
+    try {
+      const handle = await pickVault();
+      if (!handle) return; // user cancelled (AbortError)
+      await setVaultDisplayName(handle.name);
+      refreshVaultUI(handle.name);
+    } catch {
+      // showDirectoryPicker threw — API is blocked in this browser/context.
+      // Disable permanently for this session and explain why.
+      markVaultUnavailable();
+    }
   });
 
   vaultClearBtn.addEventListener('click', async () => {

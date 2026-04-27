@@ -4,6 +4,14 @@ Plain-English release log. Written for humans — users, visitors, you at 2am. U
 
 ---
 
+## v1.4.1 — "Choose, Don't Guess" *(shipped)*
+
+A fix for the vault folder picker doing nothing when clicked.
+
+- **Folder picker now tells you when it can't open** — clicking "Choose…" in the settings panel now correctly opens the OS folder picker. If your browser has blocked folder access for extension pages (a known restriction in some configurations), the button disables itself and shows "Not available" with a plain explanation, instead of silently doing nothing.
+
+---
+
 ## v1.4.0 — "Write, Then File" *(shipped)*
 
 Two features that make notes feel more like real documents.

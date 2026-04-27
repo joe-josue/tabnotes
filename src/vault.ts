@@ -60,16 +60,23 @@ export async function getStoredHandle(): Promise<FileSystemDirectoryHandle | nul
   }
 }
 
-/** Open the directory picker. Stores the handle on success; returns null on cancel. */
+/**
+ * Open the directory picker. Returns the handle on success, null if the
+ * user cancelled (AbortError). Throws for any other failure (SecurityError,
+ * etc.) so callers can distinguish "cancelled" from "API blocked".
+ */
 export async function pickVault(): Promise<FileSystemDirectoryHandle | null> {
-  if (!fsapiSupported()) return null;
+  if (!fsapiSupported()) throw new Error('unsupported');
   try {
     // showDirectoryPicker is not yet in all TS libs
     const handle = await (window as any).showDirectoryPicker({ mode: 'readwrite' });
     await idbSet(HANDLE_KEY, handle);
     return handle as FileSystemDirectoryHandle;
-  } catch {
-    return null; // user cancelled or permission refused
+  } catch (err) {
+    // AbortError = user pressed Cancel in the OS picker — treat as no-op
+    if (err instanceof DOMException && err.name === 'AbortError') return null;
+    // Anything else (SecurityError, NotAllowedError, …) = real failure
+    throw err;
   }
 }
 
