@@ -14,8 +14,10 @@ type State = {
   renderMode: RenderMode;
   welcomeSeeded: boolean;
   fontSize: number;
-  /** Display name of the chosen vault folder. The actual handle lives in IndexedDB. */
+  /** Display name of the chosen vault folder (FSAPI). The actual handle lives in IndexedDB. */
   vaultDisplayName: string | null;
+  /** Subfolder name within Downloads, e.g. "notes" → ~/Downloads/notes/. */
+  saveSubfolder: string | null;
 };
 
 const DEFAULT_STATE: State = {
@@ -25,7 +27,8 @@ const DEFAULT_STATE: State = {
   renderMode: 'markdown',
   welcomeSeeded: false,
   fontSize: 16,
-  vaultDisplayName: null
+  vaultDisplayName: null,
+  saveSubfolder: null
 };
 
 const hasChromeStorage =
@@ -43,7 +46,8 @@ async function readAll(): Promise<State> {
     'renderMode',
     'welcomeSeeded',
     'fontSize',
-    'vaultDisplayName'
+    'vaultDisplayName',
+    'saveSubfolder'
   ]);
   return {
     notes: got.notes ?? {},
@@ -52,7 +56,8 @@ async function readAll(): Promise<State> {
     renderMode: (got.renderMode as RenderMode) ?? 'markdown',
     welcomeSeeded: got.welcomeSeeded ?? false,
     fontSize: (got.fontSize as number) ?? 16,
-    vaultDisplayName: (got.vaultDisplayName as string | null) ?? null
+    vaultDisplayName: (got.vaultDisplayName as string | null) ?? null,
+    saveSubfolder: (got.saveSubfolder as string | null) ?? null
   };
 }
 
@@ -132,6 +137,10 @@ export async function setFontSize(size: number): Promise<void> {
 
 export async function setVaultDisplayName(name: string | null): Promise<void> {
   await writePartial({ vaultDisplayName: name });
+}
+
+export async function setSaveSubfolder(sub: string | null): Promise<void> {
+  await writePartial({ saveSubfolder: sub || null });
 }
 
 const WELCOME_BODY = `# Welcome to tab-notes

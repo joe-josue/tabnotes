@@ -1,6 +1,6 @@
 {
   "name": "tab-notes",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Markdown New Tab — a minimalist Markdown editor that replaces Chrome's new tab page.",
   "private": true,
   "type": "module",

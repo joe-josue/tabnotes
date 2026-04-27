@@ -66,16 +66,19 @@ export async function getStoredHandle(): Promise<FileSystemDirectoryHandle | nul
  * etc.) so callers can distinguish "cancelled" from "API blocked".
  */
 export async function pickVault(): Promise<FileSystemDirectoryHandle | null> {
-  if (!fsapiSupported()) throw new Error('unsupported');
+  if (!fsapiSupported()) return null;
   try {
-    // showDirectoryPicker is not yet in all TS libs
-    const handle = await (window as any).showDirectoryPicker({ mode: 'readwrite' });
+    // showDirectoryPicker is not yet in all TS libs — startIn:'downloads' is a hint
+    const handle = await (window as any).showDirectoryPicker({
+      mode: 'readwrite',
+      startIn: 'downloads'
+    });
     await idbSet(HANDLE_KEY, handle);
     return handle as FileSystemDirectoryHandle;
   } catch (err) {
     // AbortError = user pressed Cancel in the OS picker — treat as no-op
     if (err instanceof DOMException && err.name === 'AbortError') return null;
-    // Anything else (SecurityError, NotAllowedError, …) = real failure
+    // Anything else (SecurityError, NotAllowedError, …) = real failure — let caller handle
     throw err;
   }
 }

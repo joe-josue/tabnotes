@@ -43,9 +43,15 @@
           <div class="settings-row">
             <span class="settings-label">Save to</span>
             <div class="vault-control">
-              <span id="vault-name" class="vault-name">Downloads folder</span>
-              <button id="vault-pick" class="vault-btn" title="Choose a folder">Choose…</button>
-              <button id="vault-clear" class="vault-btn vault-btn-clear" title="Reset to Downloads" aria-label="Clear vault" style="display:none">×</button>
+              <!-- Subfolder text input — always works (relative to Downloads) -->
+              <span class="vault-dl-prefix" id="vault-dl-prefix">⬇</span>
+              <input id="vault-subfolder" class="vault-input" type="text" maxlength="60"
+                placeholder="subfolder…" title="Type a subfolder name, e.g. notes — files save to Downloads/subfolder/" />
+              <!-- Choose folder button — only shown when FSAPI is available -->
+              <button id="vault-pick" class="vault-btn" title="Choose any folder on your computer" style="display:none">Choose…</button>
+              <!-- Shown when FSAPI vault is active (replaces the input row) -->
+              <span id="vault-name" class="vault-name" style="display:none"></span>
+              <button id="vault-clear" class="vault-btn vault-btn-clear" title="Clear folder / reset to Downloads" aria-label="Clear vault" style="display:none">×</button>
             </div>
           </div>
         </div>

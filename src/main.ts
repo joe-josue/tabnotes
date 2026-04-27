@@ -18,6 +18,7 @@ import {
   setRenderMode,
   setSidebarCollapsed,
   setVaultDisplayName,
+  setSaveSubfolder,
   upsertNote,
   type Note,
   type RenderMode
@@ -29,6 +30,7 @@ let current: Note;
 let editor: EditorHandle;
 let mode: RenderMode = 'markdown';
 let fontSize = 16;
+let saveSubfolder: string | null = null;
 let settingsOpen = false;
 let saveTimer: number | undefined;
 let toastTimer: number | undefined;
@@ -166,7 +168,7 @@ function closeSettingsPanel() {
 
 function wireToolbar() {
   document.getElementById('save-btn')!.addEventListener('click', () => {
-    void downloadNote(current, mode, showToast);
+    void downloadNote(current, mode, saveSubfolder, showToast);
   });
 
   const modeBtn = document.getElementById('mode-toggle') as HTMLButtonElement;
@@ -202,48 +204,80 @@ function wireToolbar() {
   const vaultClearBtn = document.getElementById('vault-clear') as HTMLButtonElement;
   const vaultNameEl = document.getElementById('vault-name')!;
 
-  function markVaultUnavailable() {
-    vaultPickBtn.disabled = true;
-    vaultPickBtn.textContent = 'Not available';
-    vaultPickBtn.title = 'Your browser has blocked folder access for extension pages';
-    vaultNameEl.textContent = 'Downloads folder';
-    vaultNameEl.title = '';
-    vaultClearBtn.style.display = 'none';
+  const subfolderInput = document.getElementById('vault-subfolder') as HTMLInputElement;
+  const dlPrefix = document.getElementById('vault-dl-prefix')!;
+
+  // Show the FSAPI "Choose folder" button only when the API is available
+  if (fsapiSupported()) {
+    vaultPickBtn.style.display = '';
   }
 
-  // Hide vault controls entirely if the browser doesn't support FSAPI
-  if (!fsapiSupported()) {
-    markVaultUnavailable();
-  }
-
-  function refreshVaultUI(name: string | null) {
-    if (name) {
-      vaultNameEl.textContent = name;
-      vaultNameEl.title = name;
+  /**
+   * Two modes:
+   *   vault active  → show vault-name + × only; hide input row
+   *   no vault      → show input row (+ Choose button if FSAPI); hide vault-name + ×
+   */
+  function refreshVaultUI(vaultName: string | null) {
+    if (vaultName) {
+      // FSAPI vault active — show folder name + clear button
+      vaultNameEl.textContent = vaultName;
+      vaultNameEl.title = vaultName;
+      vaultNameEl.style.display = '';
       vaultClearBtn.style.display = '';
+      subfolderInput.style.display = 'none';
+      dlPrefix.style.display = 'none';
+      vaultPickBtn.style.display = 'none';
     } else {
-      vaultNameEl.textContent = 'Downloads folder';
-      vaultNameEl.title = '';
+      // No vault — show subfolder text input (+ Choose if FSAPI)
+      vaultNameEl.style.display = 'none';
       vaultClearBtn.style.display = 'none';
+      subfolderInput.style.display = '';
+      dlPrefix.style.display = '';
+      if (fsapiSupported()) vaultPickBtn.style.display = '';
     }
   }
 
-  // Load current vault name on boot (called after wireToolbar, so the elements exist)
+  // Hydrate from stored state on boot
   getVaultName().then(refreshVaultUI);
 
+  // Subfolder text input — save on Enter or blur
+  function commitSubfolder() {
+    const val = subfolderInput.value.trim();
+    saveSubfolder = val || null;
+    void setSaveSubfolder(saveSubfolder);
+  }
+  subfolderInput.addEventListener('blur', commitSubfolder);
+  subfolderInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      commitSubfolder();
+      subfolderInput.blur();
+      editor.focus();
+    }
+    if (e.key === 'Escape') {
+      subfolderInput.blur();
+      editor.focus();
+    }
+  });
+  // Stop clicks inside the input from bubbling to the outside-click handler
+  subfolderInput.addEventListener('click', (e) => e.stopPropagation());
+
+  // FSAPI vault picker
   vaultPickBtn.addEventListener('click', async () => {
     try {
       const handle = await pickVault();
-      if (!handle) return; // user cancelled (AbortError)
+      if (!handle) return; // user pressed Cancel
       await setVaultDisplayName(handle.name);
       refreshVaultUI(handle.name);
     } catch {
-      // showDirectoryPicker threw — API is blocked in this browser/context.
-      // Disable permanently for this session and explain why.
-      markVaultUnavailable();
+      // API is present but blocked (SecurityError, NotAllowedError, etc.)
+      // Hide the Choose button — subfolder input is still fully functional
+      vaultPickBtn.style.display = 'none';
+      vaultPickBtn.title = 'Folder access was blocked by your browser — use the subfolder field instead';
     }
   });
 
+  // Clear vault (FSAPI handle)
   vaultClearBtn.addEventListener('click', async () => {
     await clearVault();
     await setVaultDisplayName(null);
@@ -286,6 +320,7 @@ async function boot() {
   const justSeeded = await seedWelcomeIfNeeded();
   const state = await getState();
   mode = state.renderMode;
+  saveSubfolder = state.saveSubfolder ?? null;
   applyFontSize(state.fontSize ?? 16);
 
   let note: Note;
@@ -315,6 +350,9 @@ async function boot() {
   await sidebar.render(note.id);
   await initSidebarCollapsed();
   wireToolbar();
+  // Hydrate the subfolder input with the persisted value
+  const subfolderInputEl = document.getElementById('vault-subfolder') as HTMLInputElement | null;
+  if (subfolderInputEl && saveSubfolder) subfolderInputEl.value = saveSubfolder;
   wireGlobalKeys(sidebar);
   editor.focus();
   // Sync vault display name from IndexedDB → chrome.storage on each boot

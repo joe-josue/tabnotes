@@ -4,11 +4,19 @@ Plain-English release log. Written for humans — users, visitors, you at 2am. U
 
 ---
 
+## v1.4.2 — "Put It Where You Want It" *(shipped)*
+
+The save-location feature now actually works — for everyone, not just when the browser cooperates.
+
+- **Subfolder field in Settings** — type any name in the "Save to" field (e.g. `writing` or `my-notes`) and every `Cmd/Ctrl+S` saves the file to `Downloads/writing/your-note.md`. The folder is created automatically if it doesn't exist. No browser permissions required — this works everywhere.
+- **Your choice is remembered** — the subfolder name sticks across tabs and browser restarts.
+- **"Choose folder" is now a bonus, not the whole feature** — if your browser supports it, a "Choose…" button appears next to the subfolder field and lets you point directly at any folder on your computer (your Obsidian vault, your Documents folder, anywhere). If the browser blocks it, the subfolder field still works perfectly.
+
+---
+
 ## v1.4.1 — "Choose, Don't Guess" *(shipped)*
 
-A fix for the vault folder picker doing nothing when clicked.
-
-- **Folder picker now tells you when it can't open** — clicking "Choose…" in the settings panel now correctly opens the OS folder picker. If your browser has blocked folder access for extension pages (a known restriction in some configurations), the button disables itself and shows "Not available" with a plain explanation, instead of silently doing nothing.
+An intermediate fix (superseded by v1.4.2). Surfaced folder-access errors instead of silently swallowing them.
 
 ---
 
