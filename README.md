@@ -4,7 +4,7 @@
 
 A minimalist Markdown editor that replaces Chrome's New Tab page with a private, local-first writing space.
 
-[Install](#install) · [Shortcuts](#shortcuts) · [Roadmap](./ROADMAP.md) · [Releases](https://github.com/joe-josue/tabnotes/releases) · [Support](#support)
+[Install](#install) · [Shortcuts](#shortcuts) · [Footprint](#footprint) · [Roadmap](./ROADMAP.md) · [Releases](https://github.com/joe-josue/tabnotes/releases) · [Support](#support)
 
 ## Why
 
@@ -21,8 +21,32 @@ Built for people who want somewhere fast to think, draft, jot, or park a note wi
 - Saves notes locally — no account, no cloud, no telemetry
 - Collapsible sidebar with recent notes and quick switching
 - Adjustable font size, plain-text mode, light and dark themes
-- Exports the current note as `.md` or `.txt` straight to Downloads
+- Exports the current note as `.md` or `.txt` — to Downloads or a folder you choose
+- YAML frontmatter support — compatible with Obsidian and similar tools
+- Syntax highlighting in fenced code blocks (100+ languages, lazy-loaded)
 - Full keyboard shortcut coverage — rarely need the mouse
+
+## Footprint
+
+tab-notes is intentionally small. Here's what that actually means in concrete terms.
+
+| Metric | tab-notes |
+|---|---|
+| Initial load (first new tab) | **~190 KB** gzipped |
+| Installed size | **1.7 MB** (incl. syntax highlighting for 100+ languages) |
+| Background memory at idle | **0 MB** — no service worker, nothing running between tabs |
+| Permissions | **3** — `storage`, `unlimitedStorage`, `downloads` |
+| Website access | **None** — cannot read any page you visit |
+| External network calls | **None** — fully offline |
+| Runtime dependencies | **8** (all `@codemirror/*`) |
+
+**No background process.** tab-notes is a Manifest V3 extension with no background service worker. When you're not on a new tab, it uses zero memory. Most extensions (password managers, ad blockers, writing assistants) hold 20–100 MB in Chrome's background permanently.
+
+**Lazy loading.** The 1.2 MB of language parser chunks (Python, Go, SQL, etc.) only load on demand when you open a code fence that uses that language. Your tenth tab opens just as fast as your first.
+
+**Nothing leaves your machine.** No analytics, no telemetry, no remote fonts, no CDN dependencies. Notes are stored in `chrome.storage.local` and stay there.
+
+> To verify yourself: open a new tab → **Shift+Esc** → Chrome Task Manager → find the tab-notes entry.
 
 ## Install
 
@@ -70,11 +94,7 @@ npm run dev
 
 ## Storage
 
-All notes live in `chrome.storage.local`.
-
-- No cloud
-- No account
-- No telemetry
+All notes live in `chrome.storage.local` — local to your browser, never uploaded. See [Footprint](#footprint) for the full privacy and size breakdown.
 
 ## Status
 
