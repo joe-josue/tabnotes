@@ -384,38 +384,34 @@ html, body {
   display: flex;
   align-items: center;
   gap: 4px;
-  min-width: 0;
-  flex: 1;
-}
-
-.vault-dl-prefix {
-  font-size: 0.75rem;
-  color: var(--muted);
-  flex-shrink: 0;
-  line-height: 1;
-}
-
-.vault-input {
   flex: 1;
   min-width: 0;
+}
+
+.vault-pick-btn {
+  flex: 1;
   background: transparent;
   border: 1px solid var(--border);
-  color: var(--fg);
+  color: var(--muted);
   font-family: inherit;
   font-size: 0.74rem;
-  padding: 3px 6px;
+  font-weight: 500;
+  padding: 4px 8px;
   border-radius: 4px;
-  outline: none;
-  transition: border-color 120ms;
+  cursor: pointer;
+  text-align: center;
+  transition: background 120ms, color 120ms, border-color 120ms;
 }
 
-.vault-input::placeholder {
-  color: var(--muted);
-  opacity: 0.7;
+.vault-pick-btn:hover {
+  background: var(--sidebar-hover);
+  color: var(--fg);
+  border-color: var(--fg);
 }
 
-.vault-input:focus {
-  border-color: var(--accent);
+.vault-pick-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
 }
 
 .vault-name {
@@ -424,7 +420,6 @@ html, body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100px;
   flex: 1;
   min-width: 0;
 }
