@@ -4,3 +4,8 @@ out/
 *.mp4
 *.mov
 .DS_Store
+remotion/node_modules/
+remotion/out/
+.agents/
+.claude/
+skills-lock.json

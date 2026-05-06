@@ -6,6 +6,9 @@ export type Note = {
 };
 
 export type RenderMode = 'markdown' | 'plain';
+export type ThemeMode = 'light' | 'dark';
+
+export const DEFAULT_UNTITLED_BODY = '# Untitled Note\n\n';
 
 type State = {
   notes: Record<string, Note>;
@@ -14,6 +17,7 @@ type State = {
   renderMode: RenderMode;
   welcomeSeeded: boolean;
   fontSize: number;
+  themeMode: ThemeMode;
   /** Display name of the chosen vault folder (FSAPI). The actual handle lives in IndexedDB. */
   vaultDisplayName: string | null;
   /** Subfolder name within Downloads, e.g. "notes" → ~/Downloads/notes/. */
@@ -27,6 +31,7 @@ const DEFAULT_STATE: State = {
   renderMode: 'markdown',
   welcomeSeeded: false,
   fontSize: 16,
+  themeMode: 'dark',
   vaultDisplayName: null,
   saveSubfolder: null
 };
@@ -46,6 +51,7 @@ async function readAll(): Promise<State> {
     'renderMode',
     'welcomeSeeded',
     'fontSize',
+    'themeMode',
     'vaultDisplayName',
     'saveSubfolder'
   ]);
@@ -56,6 +62,7 @@ async function readAll(): Promise<State> {
     renderMode: (got.renderMode as RenderMode) ?? 'markdown',
     welcomeSeeded: got.welcomeSeeded ?? false,
     fontSize: (got.fontSize as number) ?? 16,
+    themeMode: (got.themeMode as ThemeMode) ?? 'dark',
     vaultDisplayName: (got.vaultDisplayName as string | null) ?? null,
     saveSubfolder: (got.saveSubfolder as string | null) ?? null
   };
@@ -72,6 +79,7 @@ async function writePartial(patch: Partial<State>): Promise<void> {
 }
 
 export function deriveTitle(body: string): string {
+  if (body === DEFAULT_UNTITLED_BODY) return 'Untitled';
   // Prefer frontmatter `title` field if present
   const fmMatch = /^---\r?\n[\s\S]*?\r?\ntitle:\s*(.+)/m.exec(body);
   if (fmMatch) {
@@ -133,6 +141,10 @@ export async function setRenderMode(mode: RenderMode): Promise<void> {
 
 export async function setFontSize(size: number): Promise<void> {
   await writePartial({ fontSize: size });
+}
+
+export async function setThemeMode(mode: ThemeMode): Promise<void> {
+  await writePartial({ themeMode: mode });
 }
 
 export async function setVaultDisplayName(name: string | null): Promise<void> {
@@ -204,13 +216,13 @@ export async function seedWelcomeIfNeeded(): Promise<boolean> {
 export async function openFreshNote(): Promise<Note> {
   const state = await readAll();
   const active = state.activeId ? state.notes[state.activeId] : null;
-  if (active && active.body.trim() === '') {
+  if (active && active.body === DEFAULT_UNTITLED_BODY) {
     return active;
   }
   const fresh: Note = {
     id: newId(),
     title: 'Untitled',
-    body: '',
+    body: DEFAULT_UNTITLED_BODY,
     updatedAt: Date.now()
   };
   state.notes[fresh.id] = fresh;
@@ -231,7 +243,7 @@ export async function ensureActiveNote(): Promise<Note> {
   const fresh: Note = {
     id: newId(),
     title: 'Untitled',
-    body: '',
+    body: DEFAULT_UNTITLED_BODY,
     updatedAt: Date.now()
   };
   await upsertNote(fresh);

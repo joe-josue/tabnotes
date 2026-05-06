@@ -3,7 +3,7 @@ import { defineManifest } from '@crxjs/vite-plugin';
 export default defineManifest({
   manifest_version: 3,
   name: 'tab-notes',
-  version: '1.4.2',
+  version: '1.5.0',
   description: 'A minimalist Markdown editor that replaces your new tab page.',
   permissions: ['storage', 'unlimitedStorage', 'downloads'],
   chrome_url_overrides: {

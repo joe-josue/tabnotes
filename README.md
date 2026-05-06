@@ -17,11 +17,12 @@ Built for people who want somewhere fast to think, draft, jot, or park a note wi
 ## Features
 
 - Replaces Chrome's New Tab page with a focused Markdown editor
+- Starts every new note with `# Untitled Note` so the page is ready for Markdown immediately
 - Live markdown styling — headings, bold, italic, code render as you type
 - Saves notes locally — no account, no cloud, no telemetry
 - Collapsible sidebar with recent notes and quick switching
-- Adjustable font size, plain-text mode, light and dark themes
-- Exports the current note as `.md` or `.txt` — to Downloads or a folder you choose
+- Adjustable font size, plain-text mode, light mode, and dark mode
+- Exports the current note as `.md` or `.txt` — to Downloads, a Downloads subfolder, or a folder you choose
 - YAML frontmatter support — compatible with Obsidian and similar tools
 - Syntax highlighting in fenced code blocks (100+ languages, lazy-loaded)
 - Full keyboard shortcut coverage — rarely need the mouse
@@ -78,6 +79,10 @@ Then load the `dist/` folder as an unpacked extension (steps 4–6 above).
 npm install
 npm run dev
 ```
+
+## Launch Demo
+
+The current launch-demo source lives in [`hyperframes-launch-demo`](./hyperframes-launch-demo). It is built with HeyGen Hyperframes and mirrors the current product surface: colour-coded Markdown headings, the new-note starter heading, light mode, folder saving, and the shortcuts modal.
 
 ## Shortcuts
 

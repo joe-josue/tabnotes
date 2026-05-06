@@ -2,9 +2,10 @@ import './styles.css';
 import { createEditor, type EditorHandle } from './editor';
 import { mountSidebar } from './sidebar';
 import { downloadNote } from './download';
-import { initTheme } from './theme';
-import { pickVault, clearVault, getVaultName, fsapiSupported } from './vault';
+import { applyTheme } from './theme';
+import { pickVault, clearVault, getVaultName, getVaultPermission, fsapiSupported } from './vault';
 import {
+  DEFAULT_UNTITLED_BODY,
   deriveTitle,
   ensureActiveNote,
   getNote,
@@ -16,20 +17,24 @@ import {
   setActiveId,
   setFontSize,
   setRenderMode,
+  setSaveSubfolder,
   setSidebarCollapsed,
+  setThemeMode,
   setVaultDisplayName,
   upsertNote,
   type Note,
-  type RenderMode
+  type RenderMode,
+  type ThemeMode
 } from './storage';
-
-initTheme();
 
 let current: Note;
 let editor: EditorHandle;
 let mode: RenderMode = 'markdown';
+let themeMode: ThemeMode = 'dark';
 let fontSize = 16;
+let saveSubfolder: string | null = null;
 let settingsOpen = false;
+let shortcutsOpen = false;
 let saveTimer: number | undefined;
 let toastTimer: number | undefined;
 
@@ -72,11 +77,16 @@ async function loadNote(id: string, sidebar: { render: (id: string | null) => Pr
 }
 
 async function createNew(sidebar: { render: (id: string | null) => Promise<void> }) {
-  const fresh: Note = { id: newId(), title: 'Untitled', body: '', updatedAt: Date.now() };
+  const fresh: Note = {
+    id: newId(),
+    title: 'Untitled',
+    body: DEFAULT_UNTITLED_BODY,
+    updatedAt: Date.now()
+  };
   await upsertNote(fresh);
   await setActiveId(fresh.id);
   current = fresh;
-  editor.setContent('');
+  editor.setContent(DEFAULT_UNTITLED_BODY);
   await sidebar.render(fresh.id);
   editor.focus();
 }
@@ -144,6 +154,28 @@ function applyFontSize(size: number) {
   if (incBtn) incBtn.disabled = size >= FONT_MAX;
 }
 
+async function saveCurrentNote() {
+  if (saveTimer) {
+    window.clearTimeout(saveTimer);
+    saveTimer = undefined;
+  }
+  const body = editor.view.state.doc.toString();
+  current = {
+    ...current,
+    body,
+    title: deriveTitle(body),
+    updatedAt: Date.now()
+  };
+  await upsertNote(current);
+  await downloadNote(current, mode, saveSubfolder, showToast, () => {
+    showToast(current.title || 'Untitled', 'Downloads blocked');
+  });
+}
+
+function sanitizeSubfolderInput(raw: string): string {
+  return raw.trim().replace(/[\\/:*?"<>|.]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+}
+
 function openSettingsPanel() {
   const panel = document.getElementById('settings-panel')!;
   const btn = document.getElementById('settings-btn')!;
@@ -164,9 +196,25 @@ function closeSettingsPanel() {
   settingsOpen = false;
 }
 
+function openShortcutsModal() {
+  const modal = document.getElementById('shortcuts-modal')!;
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  shortcutsOpen = true;
+  (document.getElementById('shortcuts-close') as HTMLButtonElement).focus();
+}
+
+function closeShortcutsModal() {
+  const modal = document.getElementById('shortcuts-modal')!;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  shortcutsOpen = false;
+  (document.getElementById('shortcuts-open') as HTMLButtonElement | null)?.focus();
+}
+
 function wireToolbar() {
   document.getElementById('save-btn')!.addEventListener('click', () => {
-    void downloadNote(current, mode, null, showToast);
+    void saveCurrentNote();
   });
 
   const modeBtn = document.getElementById('mode-toggle') as HTMLButtonElement;
@@ -197,10 +245,29 @@ function wireToolbar() {
     await setFontSize(next);
   });
 
+  const themeToggle = document.getElementById('theme-toggle') as HTMLInputElement;
+  themeToggle.checked = themeMode === 'light';
+  themeToggle.addEventListener('change', async () => {
+    themeMode = themeToggle.checked ? 'light' : 'dark';
+    applyTheme(themeMode);
+    await setThemeMode(themeMode);
+  });
+
   // Vault selector
   const vaultPickBtn = document.getElementById('vault-pick') as HTMLButtonElement;
   const vaultClearBtn = document.getElementById('vault-clear') as HTMLButtonElement;
   const vaultNameEl = document.getElementById('vault-name')!;
+  const subfolderInput = document.getElementById('save-subfolder') as HTMLInputElement;
+  const saveHelp = document.getElementById('save-location-help')!;
+
+  subfolderInput.value = saveSubfolder ?? '';
+  subfolderInput.addEventListener('change', async () => {
+    const cleaned = sanitizeSubfolderInput(subfolderInput.value);
+    subfolderInput.value = cleaned;
+    saveSubfolder = cleaned || null;
+    await setSaveSubfolder(saveSubfolder);
+    refreshVaultUI(await getVaultName());
+  });
 
   // Hide the button entirely if the browser doesn't support the File System Access API
   if (!fsapiSupported()) {
@@ -215,15 +282,25 @@ function wireToolbar() {
       vaultNameEl.style.display = '';
       vaultClearBtn.style.display = '';
       vaultPickBtn.style.display = 'none';
+      saveHelp.textContent = `Notes save directly to ${vaultName}. If permission expires, Cmd/Ctrl+S falls back to Downloads${saveSubfolder ? '/' + saveSubfolder : ''}.`;
     } else {
       // No folder — show the picker button
       vaultNameEl.style.display = 'none';
       vaultClearBtn.style.display = 'none';
       if (fsapiSupported()) vaultPickBtn.style.display = '';
+      saveHelp.textContent = fsapiSupported()
+        ? `Choose a folder for direct saves, or use a Downloads subfolder${saveSubfolder ? ' (' + saveSubfolder + ')' : ''}.`
+        : `Folder picking is unavailable in this browser. Notes save to Downloads${saveSubfolder ? '/' + saveSubfolder : ''}.`;
     }
   }
 
-  getVaultName().then(refreshVaultUI);
+  getVaultName().then(async (name) => {
+    refreshVaultUI(name);
+    const perm = await getVaultPermission();
+    if (name && perm === 'prompt') {
+      saveHelp.textContent = `${name} is selected. Your browser may ask for permission again the next time you save.`;
+    }
+  });
 
   vaultPickBtn.addEventListener('click', async () => {
     // Give visual feedback while the OS dialog is open
@@ -255,6 +332,16 @@ function wireToolbar() {
     refreshVaultUI(null);
   });
 
+  document.getElementById('shortcuts-open')!.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openShortcutsModal();
+  });
+
+  document.getElementById('shortcuts-close')!.addEventListener('click', closeShortcutsModal);
+  document.getElementById('shortcuts-modal')!.addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeShortcutsModal();
+  });
+
   // Close on outside click
   document.addEventListener('click', (e) => {
     if (!settingsOpen) return;
@@ -268,6 +355,11 @@ function wireToolbar() {
 
 function wireGlobalKeys(sidebar: { render: (id: string | null) => Promise<void> }) {
   window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && shortcutsOpen) {
+      e.preventDefault();
+      closeShortcutsModal();
+      return;
+    }
     if (e.key === 'Escape' && settingsOpen) {
       e.preventDefault();
       closeSettingsPanel();
@@ -291,6 +383,9 @@ async function boot() {
   const justSeeded = await seedWelcomeIfNeeded();
   const state = await getState();
   mode = state.renderMode;
+  themeMode = state.themeMode ?? 'dark';
+  saveSubfolder = state.saveSubfolder ?? null;
+  applyTheme(themeMode);
   applyFontSize(state.fontSize ?? 16);
 
   let note: Note;
@@ -314,7 +409,7 @@ async function boot() {
     initial: note.body,
     initialMode: mode,
     onChange: (body) => scheduleSave(body, sidebar),
-    onSave: () => void downloadNote(current, mode, null, showToast)
+    onSave: () => void saveCurrentNote()
   });
 
   await sidebar.render(note.id);

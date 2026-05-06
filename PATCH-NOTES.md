@@ -4,19 +4,38 @@ Plain-English release log. Written for humans — users, visitors, you at 2am. U
 
 ---
 
-## v1.4.2 — "Put It Where You Want It" *(shipped)*
+## v1.5.0 — "Launch Ready" *(shipped)*
 
-The save-location feature now actually works — for everyone, not just when the browser cooperates.
+The launch pass tightens the first-run writing experience, settings, save flow, and demo video so the product now presents the way it actually works.
 
-- **Subfolder field in Settings** — type any name in the "Save to" field (e.g. `writing` or `my-notes`) and every `Cmd/Ctrl+S` saves the file to `Downloads/writing/your-note.md`. The folder is created automatically if it doesn't exist. No browser permissions required — this works everywhere.
-- **Your choice is remembered** — the subfolder name sticks across tabs and browser restarts.
-- **"Choose folder" is now a bonus, not the whole feature** — if your browser supports it, a "Choose…" button appears next to the subfolder field and lets you point directly at any folder on your computer (your Obsidian vault, your Documents folder, anywhere). If the browser blocks it, the subfolder field still works perfectly.
+- **New notes start with Markdown** — every fresh note opens with `# Untitled Note`, so the editor never feels empty and new users immediately see how headings work. The sidebar still treats the untouched note as Untitled.
+- **Save location is clearer** — Settings now shows a proper save-location flow: choose a native folder when your browser allows it, keep a visible selected-folder state, clear back to Downloads, and use a Downloads subfolder fallback when folder access is unavailable or expires.
+- **Light mode toggle** — Settings now includes a light-mode switch with matching editor, sidebar, controls, modal, and syntax colours.
+- **Keyboard shortcuts modal** — a new Settings button opens a centered shortcuts reference with visual keycaps.
+- **Subtle maker credit** — Settings now includes a quiet "Built by Joe Josue" link at the bottom.
+- **New Hyperframes launch demo** — added a current-product launch demo source that reflects colour-coded Markdown, light mode, folder saving, and the shortcuts modal.
 
 ---
 
-## v1.4.1 — "Choose, Don't Guess" *(shipped)*
+## v1.4.3 — "Pick Your Spot" *(shipped)*
 
-An intermediate fix (superseded by v1.4.2). Surfaced folder-access errors instead of silently swallowing them.
+The folder selector now works the way you'd expect it to.
+
+- **Native OS folder picker** — click "Choose folder…" in Settings and your operating system's standard folder picker opens, the same one you'd see when uploading a file on any website. Navigate anywhere — Downloads, Documents, Desktop, your Obsidian vault — and select it. That's your save location from then on.
+- **Button confirms it's listening** — the button reads "Opening…" while the dialog is active, so you know it responded to the click.
+- **Folder name shows in Settings** — once chosen, the folder name appears in place of the button with a × to clear it. Every `Cmd/Ctrl+S` after that goes straight there, no dialog.
+
+---
+
+## v1.4.2 — "Put It Where You Want It" *(superseded by v1.4.3)*
+
+Introduced a subfolder text field as a workaround for the folder picker not responding. Replaced by the native picker in v1.4.3.
+
+---
+
+## v1.4.1 — "Choose, Don't Guess" *(superseded by v1.4.2)*
+
+Intermediate fix. Replaced by v1.4.2.
 
 ---
 
