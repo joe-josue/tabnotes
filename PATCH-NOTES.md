@@ -13,7 +13,7 @@ The launch pass tightens the first-run writing experience, settings, save flow, 
 - **Light mode toggle** — Settings now includes a light-mode switch with matching editor, sidebar, controls, modal, and syntax colours.
 - **Keyboard shortcuts modal** — a new Settings button opens a centered shortcuts reference with visual keycaps.
 - **Subtle maker credit** — Settings now includes a quiet "Built by Joe Josue" link at the bottom.
-- **New Hyperframes launch demo** — added a current-product launch demo source that reflects colour-coded Markdown, light mode, folder saving, and the shortcuts modal.
+- **Updated launch demo** — refreshed the product demo direction to reflect colour-coded Markdown, light mode, folder saving, and the shortcuts modal.
 
 ---
 

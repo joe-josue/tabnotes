@@ -80,10 +80,6 @@ npm install
 npm run dev
 ```
 
-## Launch Demo
-
-The current launch-demo source lives in [`hyperframes-launch-demo`](./hyperframes-launch-demo). It is built with HeyGen Hyperframes and mirrors the current product surface: colour-coded Markdown headings, the new-note starter heading, light mode, folder saving, and the shortcuts modal.
-
 ## Shortcuts
 
 | Action | Shortcut |
